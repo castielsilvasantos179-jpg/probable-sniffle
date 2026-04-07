@@ -34,14 +34,11 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   
-  // Redirect handler routes
-  app.get("/:shortCode", handleRedirect);
-  app.get("/api/link/:code", handlePublicRedirect);
-  
-  // tRPC API
+  // tRPC API (must be before catch-all routes)
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -49,12 +46,19 @@ async function startServer() {
       createContext,
     })
   );
+  
+  // API link info endpoint
+  app.get("/api/link/:code", handlePublicRedirect);
+  
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
+  
+  // Redirect handler routes (must be last, after all other routes)
+  app.get("/:shortCode", handleRedirect);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
