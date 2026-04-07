@@ -3,9 +3,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Copy } from "lucide-react";
+import { ArrowLeft, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { QRCodeSVG as QRCode } from "qrcode.react";
+import { useRef } from "react";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
@@ -123,6 +125,19 @@ export default function LinkDetails() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* QR Code */}
+            {link && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle>QR Code</CardTitle>
+                  <CardDescription>Escaneie para acessar o link</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-4">
+                  <QRCodeDisplay link={link} />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Stats */}
             {stats && (
@@ -256,6 +271,45 @@ export default function LinkDetails() {
           <div className="text-center py-8 text-gray-500">Link não encontrado</div>
         )}
       </main>
+    </div>
+  );
+}
+
+function QRCodeDisplay({ link }: { link: any }) {
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = () => {
+    if (qrRef.current) {
+      const canvas = qrRef.current.querySelector('canvas');
+      if (canvas) {
+        const url = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = `qrcode-${link.customAlias || link.shortCode}.png`;
+        downloadLink.click();
+        toast.success('QR Code baixado!');
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div ref={qrRef} className="border-4 border-gray-200 rounded-lg p-4 bg-white">
+        <QRCode
+          value={`${window.location.origin}/${link.customAlias || link.shortCode}`}
+          size={256}
+          level="H"
+          includeMargin={true}
+        />
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleDownload}
+      >
+        <Download className="w-4 h-4 mr-2" />
+        Baixar QR Code
+      </Button>
     </div>
   );
 }

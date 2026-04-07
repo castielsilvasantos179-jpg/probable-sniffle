@@ -26,7 +26,10 @@
 - [x] Listagem de links com paginação, busca e filtros
 - [x] Página de detalhes do link com estatísticas
 - [x] Formulário para criar novo link com alias, password, expiration, OG tags
-- [ ] Geração de QR Code para cada link
+- [x] Geração de QR Code para cada link
+- [x] Implementar funcionalidade de criar link no frontend
+- [x] Testar redirecionamento com Open Graph para Facebook
+- [x] Integrar geração de QR code na página de detalhes
 - [x] Editar link existente
 - [x] Deletar link com confirmação
 - [ ] Exportar dados de links e estatísticas
